@@ -115,7 +115,7 @@ namespace CapstonePRS.Controllers
             var rrt = await _context.Requests.FindAsync(requestId);
             if(rrt == null)
             {
-                return NotFound();
+                throw new Exception("The requestId does not exist");
             }
 
             rrt.Total = (from rl in _context.RequestLines

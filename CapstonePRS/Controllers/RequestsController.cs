@@ -31,7 +31,7 @@ namespace CapstonePRS.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Request>>> GetRequests()
         {
-            return await _context.Requests.ToListAsync();
+            return await _context.Requests.Include(x => x.User).ToListAsync();
         }
 
         // GET: api/Requests/5
@@ -41,7 +41,7 @@ namespace CapstonePRS.Controllers
             var request = await _context.Requests
                                             .Include(x => x.RequestLines)!
                                                 .ThenInclude(x => x.Product)
-                                                .ThenInclude(x => x.Vendor)
+                                            .Include(x => x.User)
                                             .SingleOrDefaultAsync(x => x.Id == id);
 
             if (request == null)
@@ -56,15 +56,9 @@ namespace CapstonePRS.Controllers
         [HttpGet("reviews/{userId}")]
         public async Task<ActionResult<IEnumerable<Request>>> GetRequestReview(int userid)
         {
-            //need something when the review request returns nothing in review to say none found
-            //AND if you enter userid 8 or something that does not exist,
-            //it returns all reviewed, need it to return not found again.
-           var fred = await _context.Requests.FindAsync(userid);
+            //need something if you enter userid 8, or one that does not exist, to return not found.
+           var fred = await _context.Users.FindAsync(userid);
             if(fred is null)
-            {
-                return NotFound();
-            }
-            if(fred.Status != REVIEW)
             {
                 return NotFound();
             }
@@ -112,6 +106,10 @@ namespace CapstonePRS.Controllers
         [HttpPut("review/{id}")]
         public async Task<IActionResult> Review(int id, Request request)
         {
+            request.Status = (request.Total <= 50) ? APPROVED : REVIEW;
+            return await PutRequest(id, request);
+       
+            /* --updated to Ternary statement
             if(request.Total <= 50)
             {
                 request.Status = APPROVED;
@@ -121,9 +119,8 @@ namespace CapstonePRS.Controllers
             request.Status = REVIEW;
             var reviewy = await PutRequest(id, request);
             return reviewy;
-
-             // maybe do Ternary instead? - seems to work just fine in testing.          
-            //request.Status = (request.Total <= 50) ? APPROVED : REVIEW;
+            */
+        
             
         }
 
@@ -132,9 +129,8 @@ namespace CapstonePRS.Controllers
         public async Task<IActionResult> Approve(int id, Request request)
         {
             request.Status = APPROVED;
-            var approvex = await PutRequest(id, request);
-            return approvex;
-
+            return await PutRequest(id, request);
+        
         }
 
         // PUT: /api/requests/reject/5
@@ -142,9 +138,8 @@ namespace CapstonePRS.Controllers
         public async Task<IActionResult> Reject(int id, Request request)
         {
             request.Status = REJECTED;
-            var rejectx = await PutRequest(id, request);
-            return rejectx;
-
+            return await PutRequest(id, request);
+       
         }
 
         // POST: api/Requests
