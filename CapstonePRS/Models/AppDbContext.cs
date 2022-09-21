@@ -9,7 +9,8 @@ namespace CapstonePRS.Models
         public DbSet<Product> Products { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<RequestLine> RequestLines { get; set; }
-        
+        public DbSet<Po> Pos { get; set; }
+        public DbSet<Poline> Polines { get; set; }
         
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

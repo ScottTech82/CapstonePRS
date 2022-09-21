@@ -33,12 +33,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-   //statements to auto update database when run, optional.
-using var scope = app.Services
-                    .GetRequiredService<IServiceScopeFactory>()
-                    .CreateScope();
-scope.ServiceProvider
-        .GetService<AppDbContext>()!
-        .Database.Migrate();
+//   //statements to auto update database when run, optional.
+//using var scope = app.Services
+//                    .GetRequiredService<IServiceScopeFactory>()
+//                    .CreateScope();
+//scope.ServiceProvider
+//        .GetService<AppDbContext>()!
+//        .Database.Migrate();
 
 app.Run();

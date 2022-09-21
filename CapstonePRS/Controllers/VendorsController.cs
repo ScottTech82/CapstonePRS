@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CapstonePRS.Models;
+using System.Drawing.Text;
 
 namespace CapstonePRS.Controllers
 {
@@ -13,6 +14,8 @@ namespace CapstonePRS.Controllers
     [ApiController]
     public class VendorsController : ControllerBase
     {
+        public static string APPROVED = "APPROVED";
+
         private readonly AppDbContext _context;
 
         public VendorsController(AppDbContext context)
@@ -40,6 +43,55 @@ namespace CapstonePRS.Controllers
 
             return vendor;
         }
+
+        // GET: api/Vendors/po/5
+        [HttpGet("po/{vendorId}")]
+        public async Task<ActionResult<Po>> CreatePo(int Id)
+        {
+            
+            var xPo = new Po();
+            xPo.Vendor = await _context.Vendors.FindAsync(Id); //either add if null error or figure out how to call GetVendor method.
+            var xPoline = from v in _context.Vendors
+                          join p in _context.Products
+                                on v.Id equals p.VendorId
+                          join rl in _context.RequestLines
+                                on p.Id equals rl.ProductId
+                          join r in _context.Requests
+                                on rl.RequestId equals r.Id
+                          where r.Status == APPROVED
+                          select new { p.Id, Product = p.Name, rl.Quantity, p.Price, LineTotal = p.Price * rl.Quantity };
+
+
+            var sortedLines = new Dictionary<int, Poline>();
+            foreach(var line in sortedLines)
+            {
+
+                
+                
+                //check the dictionary key by product Id and setting the dictionary key by product Id.
+               
+                var productId = await _context.Products.SingleOrDefaultAsync(x => x.Id);
+
+                if(!sortedLines.ContainsKey(productId))
+                {
+                    var poline = new Poline()
+                    {
+                        Product = line.Product,
+                        Quantity = 0,
+                        Price = line.Price,
+                        LineTotal = line.LineTotal
+                    };
+                    sortedLines.Add(line.Id, poline);
+                }
+                sortedLines[line.Id] += line.Quantity;
+            }
+
+            
+            
+
+
+        }
+        
 
         // PUT: api/Vendors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
