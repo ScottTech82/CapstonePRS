@@ -50,16 +50,8 @@ namespace CapstonePRS.Controllers
         {
             
             var xPo = new Po();
-                   //need to solve the null or use GetVendor method above?
-                   //GetVendor wont convert and Single causes an error instead of returning null.
-                   //could do if statement after to return exception.
             
-            xPo.Vendor = await _context.Vendors.SingleOrDefaultAsync(x => x.Id == vendorId);
-
-            if (xPo.Vendor == null)
-            {
-                throw new Exception("vendor Id does not exist");
-            }
+            xPo.Vendor = await _context.Vendors.FindAsync(vendorId);
 
             var xPoline = from v in _context.Vendors
                            join p in _context.Products
