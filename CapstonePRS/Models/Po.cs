@@ -1,5 +1,8 @@
-﻿namespace CapstonePRS.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace CapstonePRS.Models
 {
+    [Keyless]
     public class Po
     {
         public Vendor Vendor { get; set; }

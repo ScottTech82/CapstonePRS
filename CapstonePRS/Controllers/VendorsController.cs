@@ -46,11 +46,21 @@ namespace CapstonePRS.Controllers
 
         // GET: api/Vendors/po/5
         [HttpGet("po/{vendorId}")]
-        public async Task<ActionResult<Po>> CreatePo(int Id)
+        public async Task<ActionResult<Po>> CreatePo(int vendorId)
         {
             
             var xPo = new Po();
-            xPo.Vendor = await _context.Vendors.FindAsync(Id); //either add if null error or figure out how to call GetVendor method.
+                   //need to solve the null or use GetVendor method above?
+                   //GetVendor wont convert and Single causes an error instead of returning null.
+                   //could do if statement after to return exception.
+            
+            xPo.Vendor = await _context.Vendors.SingleOrDefaultAsync(x => x.Id == vendorId);
+
+            if (xPo.Vendor == null)
+            {
+                throw new Exception("vendor Id does not exist");
+            }
+
             var xPoline = from v in _context.Vendors
                            join p in _context.Products
                                  on v.Id equals p.VendorId
@@ -58,7 +68,7 @@ namespace CapstonePRS.Controllers
                                  on p.Id equals rl.ProductId
                            join r in _context.Requests
                                  on rl.RequestId equals r.Id
-                           where r.Status == APPROVED
+                           where r.Status == APPROVED && v.Id == vendorId
                            select new { p.Id, Product = p.Name, rl.Quantity, p.Price, LineTotal = p.Price * rl.Quantity };
 
 
@@ -78,8 +88,8 @@ namespace CapstonePRS.Controllers
                         sortedLines.Add(line.Id, poline);
                     }
 
-                sortedLines[line.Id] += line.Quantity;
-                
+                sortedLines[line.Id].Quantity += line.Quantity;
+                        
             }
 
             xPo.Polines = sortedLines.Values;
