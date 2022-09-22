@@ -52,39 +52,39 @@ namespace CapstonePRS.Controllers
             var xPo = new Po();
             xPo.Vendor = await _context.Vendors.FindAsync(Id); //either add if null error or figure out how to call GetVendor method.
             var xPoline = from v in _context.Vendors
-                          join p in _context.Products
-                                on v.Id equals p.VendorId
-                          join rl in _context.RequestLines
-                                on p.Id equals rl.ProductId
-                          join r in _context.Requests
-                                on rl.RequestId equals r.Id
-                          where r.Status == APPROVED
-                          select new { p.Id, Product = p.Name, rl.Quantity, p.Price, LineTotal = p.Price * rl.Quantity };
+                           join p in _context.Products
+                                 on v.Id equals p.VendorId
+                           join rl in _context.RequestLines
+                                 on p.Id equals rl.ProductId
+                           join r in _context.Requests
+                                 on rl.RequestId equals r.Id
+                           where r.Status == APPROVED
+                           select new { p.Id, Product = p.Name, rl.Quantity, p.Price, LineTotal = p.Price * rl.Quantity };
 
 
-            var sortedLines = new Dictionary<int, Poline>();
-            foreach(var line in sortedLines)
+            var sortedLines = new SortedList<int, Poline>();
+            foreach(var line in xPoline)
             {
 
-                
-                
-                //check the dictionary key by product Id and setting the dictionary key by product Id.
-               
-                var productId = await _context.Products.SingleOrDefaultAsync(x => x.Id);
-
-                if(!sortedLines.ContainsKey(productId))
-                {
-                    var poline = new Poline()
+                    if (!sortedLines.ContainsKey(line.Id))
                     {
-                        Product = line.Product,
-                        Quantity = 0,
-                        Price = line.Price,
-                        LineTotal = line.LineTotal
-                    };
-                    sortedLines.Add(line.Id, poline);
-                }
+                        var poline = new Poline()
+                        {
+                            Product = line.Product,   
+                            Quantity = 0,
+                            Price = line.Price,
+                            LineTotal = line.LineTotal
+                        };
+                        sortedLines.Add(line.Id, poline);
+                    }
+
                 sortedLines[line.Id] += line.Quantity;
+                
             }
+
+            xPo.Polines = sortedLines.Values;
+            xPo.PoTotal = xPoline.Sum(x => x.LineTotal);
+            return xPo;
 
             
             
