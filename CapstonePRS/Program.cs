@@ -5,14 +5,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+string ConnectionKey = "Prod";
+#if DEBUG
+ConnectionKey = "Dev";
+#endif
 
+builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(x =>
 {
-    string ConnectionKey = "Dev";
-#if RELEASE
-    ConnectionKey = "Prod";
-#endif
+//    string ConnectionKey = "Dev";  --put outside of builder.Services.
+//#if RELEASE
+//    ConnectionKey = "Prod";
+//#endif
     x.UseSqlServer(builder.Configuration.GetConnectionString(ConnectionKey));
 });
 
