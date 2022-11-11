@@ -63,7 +63,7 @@ namespace CapstonePRS.Controllers
                 return NotFound();
             }
 
-          return await _context.Requests.Where(u => u.UserId != userid && u.Status == REVIEW).ToListAsync();
+          return await _context.Requests.Where(u => u.UserId != userid && u.Status == REVIEW).Include(x => x.User).ToListAsync();
           
         }
 
